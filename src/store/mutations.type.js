@@ -1,0 +1,9 @@
+export const SET_USER = "setUser";
+export const SET_ERROR = "setError";
+export const SET_VERIFICATION = "setVerification";
+export const CLEAR_VERIFICATION = "clearVerification";
+export const CLEAR_ERROR = "clearError";
+export const SET_LOADING_STATUS = "setLoadingStatus";
+export const INIT_STORE = "initStore";
+export const SET_MESSAGE = "setMessage";
+export const CLEAR_MESSAGE = "clearMessage";

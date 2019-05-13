@@ -1,0 +1,18 @@
+//
+// Custom components Bootstrap
+//
+// @see http://getbootstrap.com/docs/4.1/getting-started/theming/ for more details
+
+// Import overriden variables
+@import "variables";
+
+// Import Bootstrap (use ~ to import from node_modules)
+@import "~bootstrap/scss/bootstrap";
+
+// Other styles
+.btn:focus,
+.btn:active {
+  // alternative is use the class .shadow-none of bootstrap
+  outline: none !important;
+  box-shadow: none !important;
+}
