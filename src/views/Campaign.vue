@@ -39,6 +39,7 @@
                 data-target="#carouselExampleIndicators"
                 :data-slide-to="index"
                 v-for="(image, index) in images"
+                v-bind:key="index"
                 :class="{ active: index==0 }"
               >></li>
             </ol>
@@ -46,6 +47,7 @@
               <div
                 class="carousel-item"
                 v-for="(image, index) in images"
+                v-bind:key="index"
                 :class="{ active: index==0 }"
               >
                 <img

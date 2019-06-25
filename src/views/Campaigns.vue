@@ -8,7 +8,7 @@
             <nav class="navigation">
               <ul>
                 <li>
-                  <a href="javascript:void(null);" @click="filterCategory('ALL', '2')">ALL</a>
+                  <a>ALL</a>
                   <ul class="children sub-menu">
                     <li>
                       <a href="javascript:void(null);" @click="filterCategory('ALL', '0')">On going</a>
@@ -19,7 +19,7 @@
                   </ul>
                 </li>
                 <li class="active">
-                  <a href="javascript:void(null);" @click="filterCategory('Charity', '2')">Charity</a>
+                  <a>Charity</a>
                   <ul class="children sub-menu">
                     <li>
                       <a
@@ -36,7 +36,7 @@
                   </ul>
                 </li>
                 <li>
-                  <a href="javascript:void(null);" @click="filterCategory('Projects', '2')">Projects</a>
+                  <a>Projects</a>
                   <ul class="children sub-menu">
                     <li>
                       <a
@@ -53,7 +53,7 @@
                   </ul>
                 </li>
                 <li>
-                  <a href="javascript:void(null);" @click="filterCategory('Personal', '2')">Personal</a>
+                  <a>Personal</a>
                   <ul class="children sub-menu">
                     <li>
                       <a
@@ -145,7 +145,12 @@
 <script>
 import { firestore, storage } from "@/firebase";
 import { mapGetters } from "vuex";
-import { LOAD_CAMPAIGNS, LOAD_MORE, RESET_LOAD } from "@/store/actions.type";
+import {
+  LOAD_CAMPAIGNS,
+  LOAD_MORE,
+  RESET_LOAD,
+  FILTER_CATEGORY
+} from "@/store/actions.type";
 //import NProgress from "nprogress";
 import objectFitImages from "object-fit-images";
 require("@/assets/styles/campaigns.css");
@@ -204,78 +209,10 @@ export default {
         return diffDays + " day left";
       }
       return diffDays + " days left";
+    },
+    filterCategory: function(category, status) {
+      this.$store.dispatch(FILTER_CATEGORY, { type: category, status: status });
     }
-    /*filterCategory: function(category, status) {
-      //NProgress.start();
-      this.loading = false;
-      let self = this;
-      let campaignRef = null;
-      if (category == "ALL") {
-        campaignRef = firestore.collection("campaigns");
-      } else {
-        campaignRef = firestore
-          .collection("campaigns")
-          .where("category", "==", category);
-      }
-      this.campaigns = [];
-      campaignRef.get().then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-          //doc.data() is never undefined for query doc snapshots
-          let days = self.calculateDays(
-            doc.data().creationDate,
-            doc.data().duration
-          );
-          let flag = false;
-          switch (status) {
-            case "0":
-              if (days.indexOf("Ended") == -1) {
-                self.campaigns.push(doc);
-                flag = true;
-              }
-              break;
-            case "1":
-              if (days.indexOf("Ended") != -1) {
-                self.campaigns.push(doc);
-                flag = true;
-              }
-              break;
-            case "2":
-              self.campaigns.push(doc);
-              flag = true;
-              break;
-          }
-          if (flag) {
-            storage
-              .ref()
-              .child("/campaigns/" + doc.id + "/img_pos0")
-              .getMetadata()
-              .then(function(metadata) {
-                if (metadata.customMetadata.height < 370) {
-                  document.getElementById(doc.id).style.objectFit = "contain";
-                  //IE
-                  document.getElementById(doc.id).style.fontFamily =
-                    "object-fit: contain;";
-                }
-              })
-              .catch(function(error) {
-                // Uh-oh, an error occurred!
-              });
-
-            storage
-              .ref()
-              .child("/campaigns/" + doc.id + "/img_pos0")
-              .getDownloadURL()
-              .then(function(url) {
-                document.getElementById(doc.id).src = url;
-              })
-              .catch(function(error) {
-                console.error(error);
-              });
-          }
-        });
-        self.loading = true;
-      });
-    } */
   },
   mounted: function() {
     objectFitImages();

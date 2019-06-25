@@ -12,3 +12,5 @@ export const CLEAR_LOADMORE = "clearLoadMore";
 export const SET_CAMPAIGNS = "setCampaigns";
 export const CLEAR_CAMPAIGNS = "clearCampaigns";
 export const SET_LOADSTATUS = "setLoadStatus";
+export const SET_FILTER = "setFilter";
+export const CLEAR_FILTER = "clearFilter";

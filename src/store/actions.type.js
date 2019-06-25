@@ -9,3 +9,4 @@ export const DELETE_ACCOUNT = "deleteAccount";
 export const LOAD_CAMPAIGNS = "loadCampaigns";
 export const LOAD_MORE = "loadMore";
 export const RESET_LOAD = "resetLoad";
+export const FILTER_CATEGORY = "filterCategory";
