@@ -6,3 +6,6 @@ export const VERIFY_USER = "verifyUser";
 export const UPDATE_USER = "updateUser";
 export const CHANGE_PASSWORD = "changePassword";
 export const DELETE_ACCOUNT = "deleteAccount";
+export const LOAD_CAMPAIGNS = "loadCampaigns";
+export const LOAD_MORE = "loadMore";
+export const RESET_LOAD = "resetLoad";

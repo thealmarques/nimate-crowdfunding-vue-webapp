@@ -87,7 +87,7 @@
       </div>
     </div>
     <div class="py-3">
-      <div v-if="this.loading" class="row mb-2">
+      <div v-if="!isLoading" class="row mb-2">
         <div v-for="campaign in campaigns" v-bind:key="campaign.id" class="col-md-6">
           <a
             class="card-link mb-4"
@@ -120,6 +120,15 @@
           </a>
         </div>
       </div>
+      <div>
+        <button
+          v-if="!completed"
+          id="loadMoreBtn"
+          type="button"
+          class="btn btn-primary"
+          @click="loadMoreCampaigns()"
+        >More Campaigns...</button>
+      </div>
     </div>
     <div class="py-3">
       <div class="container">
@@ -135,9 +144,12 @@
 
 <script>
 import { firestore, storage } from "@/firebase";
+import { mapGetters } from "vuex";
+import { LOAD_CAMPAIGNS, LOAD_MORE, RESET_LOAD } from "@/store/actions.type";
 //import NProgress from "nprogress";
 import objectFitImages from "object-fit-images";
 require("@/assets/styles/campaigns.css");
+
 let urlCrypt = require("url-crypt")(
   "%VKegd<T<\"'7S6,;YB'p[vnt\"x>u`49F(\\d*xdBB6EA"
 );
@@ -145,13 +157,19 @@ let urlCrypt = require("url-crypt")(
 export default {
   name: "Campaigns",
   data() {
-    return {
-      campaigns: [],
-      loading: false
-    };
+    return {};
+  },
+  computed: {
+    ...mapGetters(["error", "campaigns", "isLoading", "loadMore", "completed"])
   },
   methods: {
+    loadMoreCampaigns() {
+      var self = this;
+      this.$store.dispatch(LOAD_MORE);
+    },
     navigateToCampaign(id) {
+      this.$store.dispatch(RESET_LOAD);
+
       let data = {
         id: id
       };
@@ -186,8 +204,8 @@ export default {
         return diffDays + " day left";
       }
       return diffDays + " days left";
-    },
-    filterCategory: function(category, status) {
+    }
+    /*filterCategory: function(category, status) {
       //NProgress.start();
       this.loading = false;
       let self = this;
@@ -257,50 +275,13 @@ export default {
         });
         self.loading = true;
       });
-    }
+    } */
   },
   mounted: function() {
     objectFitImages();
     var self = this;
-    firestore
-      .collection("campaigns")
-      .get()
-      .then(function(querySnapshot) {
-        self.campaigns = querySnapshot.docs;
-        querySnapshot.forEach(function(doc) {
-          //doc.data() is never undefined for query doc snapshots
-
-          storage
-            .ref()
-            .child("/campaigns/" + doc.id + "/img_pos0")
-            .getMetadata()
-            .then(function(metadata) {
-              if (metadata.customMetadata.height < 370) {
-                document.getElementById(doc.id).style.objectFit = "contain";
-                //IE
-                document.getElementById(doc.id).style.fontFamily =
-                  "object-fit: contain;";
-              }
-              //metadata.customMetadata.width
-            })
-            .catch(function(error) {
-              // Uh-oh, an error occurred!
-            });
-
-          storage
-            .ref()
-            .child("/campaigns/" + doc.id + "/img_pos0")
-            .getDownloadURL()
-            .then(function(url) {
-              document.getElementById(doc.id).src = url;
-            })
-            .catch(function(error) {
-              console.error(error);
-            });
-        });
-        //NProgress.done();
-        self.loading = true;
-      });
+    this.$store.dispatch(RESET_LOAD);
+    this.$store.dispatch(LOAD_CAMPAIGNS);
   },
   created: function() {
     //NProgress.start();
@@ -344,6 +325,11 @@ body {
   align-items: center;
   justify-content: center;
   text-rendering: optimizeLegibility;
+}
+
+#loadMoreBtn {
+  display: block;
+  margin: 0 auto;
 }
 
 #container {
