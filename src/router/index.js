@@ -7,6 +7,8 @@ import Campaigns from "@/views/Campaigns";
 import CreateCampaign from "@/views/CreateCampaign";
 import Profile from "@/views/Profile";
 import Campaign from "@/views/Campaign";
+import MyCampaigns from "@/views/MyCampaigns";
+import Store from "@/store/index.js";
 
 Vue.use(Router);
 
@@ -37,7 +39,10 @@ const VueRouter = new Router({
     {
       path: "/start",
       name: "createCampaign",
-      component: CreateCampaign
+      component: CreateCampaign,
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: "/profile",
@@ -49,25 +54,39 @@ const VueRouter = new Router({
       name: "campaign",
       component: Campaign,
       props: true
+    },
+    {
+      path: "/mycampaigns",
+      name: "mycampaigns",
+      component: MyCampaigns,
+      meta: {
+        requiresAuth: true
+      }
     }
   ]
 });
 
 VueRouter.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // this route requires auth, check if logged in
-    // if not, redirect to login page.
-    // TODO - To be fixed using vue persist
-    /*if (!JSON.parse(vuexLocal.storage.vuex).currentUser) {
+    if (Store.getters.currentUser == null) {
       next({
-        path: "/login",
-        query: { redirect: to.fullPath }
+        path: "/login"
       });
     } else {
+      //let user = Store.getters.currentUser;
+      /*if (to.matched.some(record => record.meta.is_admin)) {
+        if (user.is_admin == 1) {
+          next();
+        } else {
+          next({ name: "userboard" });
+        }
+      } else {
+        next();
+      }*/
       next();
-    }*/
+    }
   } else {
-    next(); // make sure to always call next()!
+    next();
   }
 });
 

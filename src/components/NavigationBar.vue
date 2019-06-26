@@ -54,7 +54,9 @@
               <router-link to="/profile">
                 <a class="dropdown-item" href="javascript:void(null);">Profile</a>
               </router-link>
-              <a class="dropdown-item" href="javascript:void(null);">My Campaigns</a>
+              <router-link to="/mycampaigns">
+                <a class="dropdown-item" href="javascript:void(null);">My Campaigns</a>
+              </router-link>
               <a class="dropdown-item" href="javascript:void(null);">Donations</a>
               <a class="dropdown-item" href="javascript:void(null);">Contact us</a>
               <a class="dropdown-item" href="javascript:void(null);" @click="logout">Logout</a>
