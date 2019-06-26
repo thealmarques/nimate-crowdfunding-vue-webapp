@@ -19,7 +19,7 @@ const state = {
   campaigns: [],
   loadMore: 2,
   loadSize: 2,
-  completed: false,
+  completed: true,
   filter: {}
 };
 
@@ -63,6 +63,8 @@ const actions = {
             querySnapshot.docs.length == 0
           ) {
             commit(SET_LOADSTATUS, true);
+          } else {
+            commit(SET_LOADSTATUS, false);
           }
 
           commit(SET_CAMPAIGNS, querySnapshot.docs);
@@ -134,8 +136,10 @@ const actions = {
 
       campaignRef.get().then(function(querySnapshot) {
         let auxiliar_campaigns = [];
-        if (querySnapshot.length == 0) {
+        if (querySnapshot.docs.length == 0) {
           commit(SET_LOADSTATUS, true);
+        } else {
+          commit(SET_LOADSTATUS, false);
         }
         querySnapshot.forEach(function(doc) {
           //doc.data() is never undefined for query doc snapshots
@@ -167,6 +171,8 @@ const actions = {
             auxiliar_campaigns.length == 0
           ) {
             commit(SET_LOADSTATUS, true);
+          } else {
+            commit(SET_LOADSTATUS, false);
           }
 
           commit(SET_CAMPAIGNS, auxiliar_campaigns);
@@ -201,7 +207,6 @@ const actions = {
               });
           }
         });
-        commit(SET_LOADSTATUS, false);
       });
     }
   },
@@ -237,7 +242,7 @@ const mutations = {
   },
   [CLEAR_LOADMORE](state) {
     state.loadMore = state.loadSize;
-    state.completed = false;
+    state.completed = true;
     state.campaigns = [];
     state.filter = {};
   },

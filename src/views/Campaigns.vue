@@ -128,6 +128,7 @@
           class="btn btn-primary"
           @click="loadMoreCampaigns()"
         >More Campaigns...</button>
+        <h6 id="loadMoreText" v-else>No more campaigns to show 😢</h6>
       </div>
     </div>
     <div class="py-3">
@@ -267,6 +268,10 @@ body {
 #loadMoreBtn {
   display: block;
   margin: 0 auto;
+}
+
+#loadMoreText {
+  text-align: center;
 }
 
 #container {
