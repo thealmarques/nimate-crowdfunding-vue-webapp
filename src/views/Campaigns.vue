@@ -77,9 +77,14 @@
       </div>
       <div class="row">
         <div class="col-md-12 py-3">
-          <form class="search">
+          <form @submit.prevent="onSearch" class="search">
             <div class="search__wrapper">
-              <input type="text" name placeholder="Search for..." class="search__field">
+              <input
+                type="text"
+                v-model="searchText"
+                placeholder="Search for..."
+                class="search__field"
+              >
               <button type="submit" class="fa fa-search search__icon"></button>
             </div>
           </form>
@@ -128,7 +133,7 @@
           class="btn btn-primary"
           @click="loadMoreCampaigns()"
         >More Campaigns...</button>
-        <h6 id="loadMoreText" v-else>No more campaigns to show 😢</h6>
+        <h6 id="loadMoreText" v-else-if="!isLoading && completed">No more campaigns to show 😢</h6>
       </div>
     </div>
     <div class="py-3">
@@ -150,7 +155,8 @@ import {
   LOAD_CAMPAIGNS,
   LOAD_MORE,
   RESET_LOAD,
-  FILTER_CATEGORY
+  FILTER_CATEGORY,
+  SEARCH_CAMPAIGN
 } from "@/store/actions.type";
 //import NProgress from "nprogress";
 import objectFitImages from "object-fit-images";
@@ -163,12 +169,17 @@ let urlCrypt = require("url-crypt")(
 export default {
   name: "Campaigns",
   data() {
-    return {};
+    return {
+      searchText: ""
+    };
   },
   computed: {
     ...mapGetters(["error", "campaigns", "isLoading", "loadMore", "completed"])
   },
   methods: {
+    onSearch() {
+      this.$store.dispatch(SEARCH_CAMPAIGN, this.searchText);
+    },
     loadMoreCampaigns() {
       var self = this;
       this.$store.dispatch(LOAD_MORE);

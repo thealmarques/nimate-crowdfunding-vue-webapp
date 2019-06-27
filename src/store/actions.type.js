@@ -11,3 +11,4 @@ export const LOAD_CAMPAIGNS = "loadCampaigns";
 export const LOAD_MORE = "loadMore";
 export const RESET_LOAD = "resetLoad";
 export const FILTER_CATEGORY = "filterCategory";
+export const SEARCH_CAMPAIGN = "searchCampaign";

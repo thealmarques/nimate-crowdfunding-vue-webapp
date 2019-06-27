@@ -10,7 +10,7 @@ import {
 
 const state = {
   error: null,
-  isLoading: false,
+  isLoading: true,
   verification: true,
   message: null
 };

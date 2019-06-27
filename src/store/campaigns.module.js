@@ -5,13 +5,15 @@ import {
   SET_CAMPAIGNS,
   SET_LOADSTATUS,
   SET_FILTER,
-  CLEAR_FILTER
+  CLEAR_FILTER,
+  SET_SEARCH
 } from "./mutations.type";
 import {
   LOAD_CAMPAIGNS,
   LOAD_MORE,
   RESET_LOAD,
-  FILTER_CATEGORY
+  FILTER_CATEGORY,
+  SEARCH_CAMPAIGN
 } from "./actions.type";
 import { firestore, storage } from "../firebase";
 
@@ -20,7 +22,8 @@ const state = {
   loadMore: 2,
   loadSize: 2,
   completed: true,
-  filter: {}
+  filter: {},
+  search: null
 };
 
 const getters = {
@@ -42,21 +45,37 @@ const actions = {
   async [LOAD_CAMPAIGNS]({ commit, state }) {
     //If there is no filter associated
     if (Object.keys(state.filter).length === 0) {
-      let firestore_query = firestore
-        .collection("campaigns")
-        .limit(state.loadSize);
-      if (state.loadMore > state.loadSize) {
-        //https://firebase.google.com/docs/firestore/query-data/query-cursors
-        let lastElement = state.campaigns[state.campaigns.length - 1];
+      let firestore_query = null;
+      //Search query
+
+      if (!state.search) {
         firestore_query = firestore
           .collection("campaigns")
-          .startAfter(lastElement)
           .limit(state.loadSize);
+        if (state.loadMore > state.loadSize) {
+          //https://firebase.google.com/docs/firestore/query-data/query-cursors
+          let lastElement = state.campaigns[state.campaigns.length - 1];
+          firestore_query = firestore
+            .collection("campaigns")
+            .startAfter(lastElement)
+            .limit(state.loadSize);
+        } else {
+          commit(SET_LOADING_STATUS, true);
+        }
       } else {
+        firestore_query = firestore.collection("campaigns");
+        if (state.loadMore > state.loadSize) {
+          let lastElement = state.campaigns[state.campaigns.length - 1];
+          firestore_query = firestore
+            .collection("campaigns")
+            .startAfter(lastElement);
+        }
         commit(SET_LOADING_STATUS, true);
       }
 
       try {
+        let auxiliar_campaigns = [];
+
         await firestore_query.get().then(function(querySnapshot) {
           if (
             querySnapshot.docs.length % 2 != 0 ||
@@ -67,10 +86,46 @@ const actions = {
             commit(SET_LOADSTATUS, false);
           }
 
-          commit(SET_CAMPAIGNS, querySnapshot.docs);
+          if (state.search != null) {
+            querySnapshot.forEach(function(doc) {
+              let title = doc
+                .data()
+                .title.toString()
+                .toLowerCase();
+              let query = state.search.toString();
+              if (title.includes(query.toLowerCase())) {
+                auxiliar_campaigns.push(doc);
+              }
+            });
+
+            if (auxiliar_campaigns.length > state.loadSize) {
+              commit(
+                SET_CAMPAIGNS,
+                auxiliar_campaigns.slice(0, state.loadSize)
+              );
+              auxiliar_campaigns = auxiliar_campaigns.slice(0, state.loadSize);
+            } else {
+              commit(SET_CAMPAIGNS, auxiliar_campaigns);
+            }
+
+            if (
+              (state.loadMore > auxiliar_campaigns.length &&
+                auxiliar_campaigns.length % 2 != 0) ||
+              auxiliar_campaigns.length == 0
+            ) {
+              commit(SET_LOADSTATUS, true);
+            } else {
+              commit(SET_LOADSTATUS, false);
+            }
+          } else {
+            auxiliar_campaigns = querySnapshot.docs;
+            commit(SET_CAMPAIGNS, querySnapshot.docs);
+          }
+
           commit(SET_LOADING_STATUS, false);
 
-          querySnapshot.docs.forEach(function(doc) {
+          auxiliar_campaigns.forEach(function(doc) {
+            if (doc == null) return;
             storage
               .ref()
               .child("/campaigns/" + doc.id + "/img_pos0")
@@ -147,65 +202,62 @@ const actions = {
             doc.data().creationDate,
             doc.data().duration
           );
-          let flag = false;
           switch (state.filter.status) {
             case "0":
               if (days.indexOf("Ended") == -1) {
                 auxiliar_campaigns.push(doc);
-                flag = true;
               }
               break;
             case "1":
               if (days.indexOf("Ended") != -1) {
                 auxiliar_campaigns.push(doc);
-                flag = true;
               }
               break;
             case "2":
               auxiliar_campaigns.push(doc);
-              flag = true;
               break;
           }
-          if (
-            auxiliar_campaigns.length % 2 != 0 ||
-            auxiliar_campaigns.length == 0
-          ) {
-            commit(SET_LOADSTATUS, true);
-          } else {
-            commit(SET_LOADSTATUS, false);
-          }
+        });
 
-          commit(SET_CAMPAIGNS, auxiliar_campaigns);
-          commit(SET_LOADING_STATUS, false);
+        if (
+          auxiliar_campaigns.length % 2 != 0 ||
+          auxiliar_campaigns.length == 0
+        ) {
+          commit(SET_LOADSTATUS, true);
+        } else {
+          commit(SET_LOADSTATUS, false);
+        }
 
-          if (flag) {
-            storage
-              .ref()
-              .child("/campaigns/" + doc.id + "/img_pos0")
-              .getMetadata()
-              .then(function(metadata) {
-                if (metadata.customMetadata.height < 370) {
-                  document.getElementById(doc.id).style.objectFit = "contain";
-                  //IE
-                  document.getElementById(doc.id).style.fontFamily =
-                    "object-fit: contain;";
-                }
-              })
-              .catch(function(error) {
-                console.log("Erro: " + error);
-              });
+        commit(SET_CAMPAIGNS, auxiliar_campaigns);
+        commit(SET_LOADING_STATUS, false);
 
-            storage
-              .ref()
-              .child("/campaigns/" + doc.id + "/img_pos0")
-              .getDownloadURL()
-              .then(function(url) {
-                document.getElementById(doc.id).src = url;
-              })
-              .catch(function(error) {
-                console.error(error);
-              });
-          }
+        auxiliar_campaigns.forEach(function(doc) {
+          storage
+            .ref()
+            .child("/campaigns/" + doc.id + "/img_pos0")
+            .getMetadata()
+            .then(function(metadata) {
+              if (metadata.customMetadata.height < 370) {
+                document.getElementById(doc.id).style.objectFit = "contain";
+                //IE
+                document.getElementById(doc.id).style.fontFamily =
+                  "object-fit: contain;";
+              }
+            })
+            .catch(function(error) {
+              console.log("Erro: " + error);
+            });
+
+          storage
+            .ref()
+            .child("/campaigns/" + doc.id + "/img_pos0")
+            .getDownloadURL()
+            .then(function(url) {
+              document.getElementById(doc.id).src = url;
+            })
+            .catch(function(error) {
+              console.error(error);
+            });
         });
       });
     }
@@ -221,6 +273,11 @@ const actions = {
     commit(CLEAR_LOADMORE);
     commit(SET_FILTER, data);
     dispatch(LOAD_CAMPAIGNS);
+  },
+  async [SEARCH_CAMPAIGN]({ commit, dispatch }, query) {
+    commit(CLEAR_LOADMORE);
+    commit(SET_SEARCH, query);
+    dispatch(LOAD_CAMPAIGNS);
   }
 };
 
@@ -229,7 +286,7 @@ const mutations = {
     state.loadMore += state.loadSize;
   },
   [CLEAR_LOADMORE](state) {
-    state.loadMore = 0;
+    state.loadMore = state.loadSize;
   },
   [SET_CAMPAIGNS](state, data) {
     if (data.length === 0) return;
@@ -245,6 +302,7 @@ const mutations = {
     state.completed = true;
     state.campaigns = [];
     state.filter = {};
+    state.search = null;
   },
   [SET_LOADSTATUS](state, data) {
     state.completed = data;
@@ -254,6 +312,9 @@ const mutations = {
   },
   [CLEAR_FILTER](state) {
     state.filter = {};
+  },
+  [SET_SEARCH](state, text) {
+    state.search = text;
   }
 };
 
