@@ -46,7 +46,7 @@
             <div class="panel panel-default">
               <table class="table table-hover">
                 <tbody>
-                  <tr v-for="campaign in campaigns" v-bind:key="campaign.id">
+                  <tr v-for="campaign in mycampaigns" v-bind:key="campaign.id">
                     <td
                       style="cursor:pointer;"
                       @click="openCampaign(campaign.id)"
@@ -108,6 +108,11 @@
 
 <script>
 import { firestore, storage } from "@/firebase";
+import {
+  LOAD_MYCAMPAIGNS,
+  REFRESH_MYCAMPAIGNS,
+  DELETE_MYCAMPAIGN
+} from "@/store/actions.type";
 import { mapGetters } from "vuex";
 let urlCrypt = require("url-crypt")(
   "%VKegd<T<\"'7S6,;YB'p[vnt\"x>u`49F(\\d*xdBB6EA"
@@ -118,8 +123,6 @@ export default {
   name: "MyCampaigns",
   data() {
     return {
-      campaigns: [],
-      loading: false,
       open: false,
       idDelete: "",
       titleDelete: "",
@@ -130,7 +133,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["currentUser", "error"])
+    ...mapGetters(["currentUser", "mycampaigns", "isLoading"])
   },
   methods: {
     openCampaign: function(id) {
@@ -146,64 +149,8 @@ export default {
         }
       });
     },
-    calculateDays: function(date, duration) {
-      let auxDate = new Date(date);
-      let date1 = new Date();
-      let days = parseInt(duration);
-      auxDate.setDate(auxDate.getDate() + days);
-      if (date1 > auxDate) {
-        return "Ended";
-      }
-
-      let timeDiff = Math.abs(auxDate.getTime() - date1.getTime());
-      let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      if (diffDays == 1) {
-        return diffDays + " day left";
-      }
-      return diffDays + " days left";
-    },
     refreshCampaign(type) {
-      switch (type) {
-        case 1:
-          document.getElementById("ended").classList.remove("active");
-          document.getElementById("ongoing").classList.add("active");
-          break;
-        case 2:
-          document.getElementById("ongoing").classList.remove("active");
-          document.getElementById("ended").classList.add("active");
-          break;
-      }
-
-      var self = this;
-      let campaignRef = db
-        .collection("campaigns")
-        .where("user", "==", this.currentUser.uid);
-      this.campaigns = [];
-
-      campaignRef.get().then(function(querySnapshot) {
-        //self.campaigns = querySnapshot.docs;
-        querySnapshot.forEach(function(doc) {
-          //doc.data() is never undefined for query doc snapshots
-          let days = self.calculateDays(
-            doc.data().creationDate,
-            doc.data().duration
-          );
-
-          switch (type) {
-            case 1:
-              if (days.indexOf("Ended") == -1) {
-                self.campaigns.push(doc);
-              }
-              break;
-            case 2:
-              if (days.indexOf("Ended") != -1) {
-                self.campaigns.push(doc);
-              }
-              break;
-          }
-        });
-        self.loading = true;
-      });
+      this.$store.dispatch(REFRESH_MYCAMPAIGNS, type);
     },
     deleteCampaign(id, title) {
       this.open = true;
@@ -223,16 +170,12 @@ export default {
         return;
       }
 
-      firebase
-        .firestore()
-        .collection("requests")
-        .add({
-          type: "delete",
-          campaign: this.idDelete,
-          user: currentUser.uid,
-          motive: this.motive
+      this.$store
+        .dispatch(DELETE_MYCAMPAIGN, {
+          motive: this.motive,
+          idDelete: this.idDelete
         })
-        .then(function(docRef) {
+        .then(function() {
           self.open = false;
           self.okmessage = true;
           self.errormessage = false;
@@ -249,15 +192,7 @@ export default {
     }
   },
   mounted: function() {
-    var self = this;
-    let campaignRef = db
-      .collection("campaigns")
-      .where("user", "==", this.currentUser.uid);
-
-    campaignRef.get().then(function(querySnapshot) {
-      self.campaigns = querySnapshot.docs;
-      self.loading = true;
-    });
+    this.$store.dispatch(LOAD_MYCAMPAIGNS);
   }
 };
 </script>

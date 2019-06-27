@@ -19,8 +19,8 @@ import { firestore, storage } from "../firebase";
 
 const state = {
   campaigns: [],
-  loadMore: 2,
-  loadSize: 2,
+  loadMore: 4,
+  loadSize: 4,
   completed: true,
   filter: {},
   search: null
