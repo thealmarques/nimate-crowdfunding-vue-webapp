@@ -4,7 +4,7 @@
     <div class="container">
       <router-link class="navbar-brand" :to="{ name: 'home' }">
         <img src="@/assets/imgs/logo_app_1.png" width="35" height="35" alt="Nimiq funding logo">
-        Nimiq Funding
+        Nimate
       </router-link>
       <button
         class="navbar-toggler"
