@@ -1,7 +1,6 @@
 import { SET_IMAGES, SET_LOADING_IMAGES, SET_DETAIL } from "./mutations.type";
 import { GET_CAMPAIGN_DETAILS, GET_IMAGES } from "./actions.type";
 import { firestore, storage } from "../firebase";
-import HubApi from "@nimiq/hub-api";
 
 const state = {
   images: [],

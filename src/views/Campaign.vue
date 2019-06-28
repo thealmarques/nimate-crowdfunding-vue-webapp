@@ -125,6 +125,7 @@
         <div class="row">
           <div class="text-center mx-auto col-md-12 py-3">
             <h1>Help Fund this Campaign</h1>
+            <div v-if="info" class="mt-1 alert alert-success" role="alert">{{ info }}</div>
           </div>
         </div>
         <div class="row" style>
@@ -170,11 +171,21 @@
               <i>.</i>
               <br>
             </p>
-            <a
-              class="btn btn-primary"
-              href="javascript:void(null);"
-              @click="createTransaction()"
-            >Send NIMIQ</a>
+            <div class="btn-group">
+              <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Send NIMIQ</button>
+              <div class="dropdown-menu">
+                <form @submit.prevent="createTransaction" class="p-3">
+                  <div class="form-group">
+                    <label for="sendNimTransaction">Amount</label>
+                    <input type="text" v-model="nim_amount" class="form-control" placeholder="NIMs">
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Send
+                    <br>
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -211,7 +222,8 @@ export default {
       balance_pool: 0,
       next_payout: 0,
       connections: 0,
-      info: ""
+      info: "",
+      nim_amount: ""
     };
   },
   computed: {
@@ -219,14 +231,16 @@ export default {
   },
   methods: {
     async createTransaction() {
+      this.info = "";
       const requestOptions = {
         appName: "Nimate",
         recipient: this.detail.address,
-        value: 100 * 1e5 // 100 NIM
+        value: this.nim_amount * 1e5 // 100 NIM
       };
 
       // All client requests are async and return a promise
       const signedTransaction = await hubApi.checkout(requestOptions);
+      this.info = "Thank you for your contribution";
     },
     calculateDays: function(date, duration) {
       let auxDate = new Date(date);
