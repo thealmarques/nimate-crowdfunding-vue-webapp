@@ -29,7 +29,7 @@
       <div class="container" v-if="!loadingImages">
         <div class="row">
           <div id="carouselExampleIndicators" class="carousel slide col-md-6" data-ride="carousel">
-            <div class="carousel-inner">
+            <div class="carousel-inner" role="listbox">
               <div
                 class="carousel-item"
                 v-for="(image, index) in images"
@@ -170,7 +170,11 @@
               <i>.</i>
               <br>
             </p>
-            <a class="btn btn-primary" href="javascript:void(null);">Send NIMIQ</a>
+            <a
+              class="btn btn-primary"
+              href="javascript:void(null);"
+              @click="createTransaction()"
+            >Send NIMIQ</a>
           </div>
         </div>
       </div>
@@ -183,6 +187,13 @@
 import { firestore, storage } from "@/firebase";
 import { GET_CAMPAIGN_DETAILS, GET_IMAGES } from "@/store/actions.type";
 import { mapGetters } from "vuex";
+import HubApi from "@nimiq/hub-api";
+
+// Connect to testnet
+const hubApi = new HubApi("https://hub.nimiq-testnet.com");
+// Connect to mainnet
+//const hubApi = new HubApi('https://hub.nimiq.com');
+
 let urlCrypt = require("url-crypt")(
   "%VKegd<T<\"'7S6,;YB'p[vnt\"x>u`49F(\\d*xdBB6EA"
 );
@@ -207,6 +218,16 @@ export default {
     ...mapGetters(["currentUser", "images", "detail", "loadingImages"])
   },
   methods: {
+    async createTransaction() {
+      const requestOptions = {
+        appName: "Nimate",
+        recipient: this.detail.address,
+        value: 100 * 1e5 // 100 NIM
+      };
+
+      // All client requests are async and return a promise
+      const signedTransaction = await hubApi.checkout(requestOptions);
+    },
     calculateDays: function(date, duration) {
       let auxDate = new Date(date);
       let date1 = new Date();
