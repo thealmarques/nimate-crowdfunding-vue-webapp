@@ -1,10 +1,10 @@
 <template>
-  <div class="campaign" v-if="loading">
+  <div class="campaign">
     <div class="py-2">
       <div class="container">
         <div class="row">
           <div class="col-md-10">
-            <h1 class="display-5">{{this.title}}</h1>
+            <h1 class="display-5">{{detail.title}}</h1>
           </div>
           <div class="col-md-2">
             <a class="btn btn-social-icon btn-twitter">
@@ -20,30 +20,16 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <h5 class>{{this.days}}</h5>
+            <h5 class>{{detail.days}}</h5>
           </div>
         </div>
       </div>
     </div>
     <div class="py-1">
-      <div class="container">
+      <div class="container" v-if="!loadingImages">
         <div class="row">
-          <div
-            id="carouselExampleIndicators"
-            class="carousel slide col-md-6"
-            data-ride="carousel"
-            v-bind:key="this.render"
-          >
-            <ol class="carousel-indicators">
-              <li
-                data-target="#carouselExampleIndicators"
-                :data-slide-to="index"
-                v-for="(image, index) in images"
-                v-bind:key="index"
-                :class="{ active: index==0 }"
-              >></li>
-            </ol>
-            <div class="carousel-inner" style="height: 100%;">
+          <div id="carouselExampleIndicators" class="carousel slide col-md-6" data-ride="carousel">
+            <div class="carousel-inner">
               <div
                 class="carousel-item"
                 v-for="(image, index) in images"
@@ -52,8 +38,9 @@
               >
                 <img
                   :src="image"
-                  style=" width: 100%;
-                        height: 320px;
+                  style="
+                        width: 100%;
+                        height: 400px;
                         object-fit: contain;
                         font-family: 'object-fit: contain;';"
                 >
@@ -89,13 +76,13 @@
             </ul>
             <div class="tab-content mt-2">
               <div class="tab-pane fade show active" id="tabone" role="tabpanel">
-                <p align="justify">{{this.description}}</p>
+                <p align="justify">{{detail.description}}</p>
               </div>
               <div class="tab-pane fade" id="tabtwo" role="tabpanel">
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item">
                     <i class="fa text-primary mr-2 fa-envelope"></i>
-                    {{this.email}}
+                    {{detail.email}}
                   </li>
                 </ul>
               </div>
@@ -112,8 +99,8 @@
               <div
                 class="progress-bar progress-bar-striped"
                 role="progressbar"
-                :style="this.percentage"
-              >{{this.completed}}%</div>
+                :style="detail.percentage"
+              >{{detail.completed}}%</div>
             </div>
           </div>
         </div>
@@ -124,9 +111,9 @@
         <div class="row">
           <div class="col-md-12">
             <h2 class>
-              Goal: {{this.goal.toLocaleString()}} NIMs
+              Goal: {{detail.goal.toLocaleString()}} NIMs
               <font color="#6c757d">
-                <span style="font-size: 25.6px;">{{this.balance.toLocaleString()}} Raised</span>
+                <span style="font-size: 25.6px;">{{detail.balance.toLocaleString()}} Raised</span>
               </font>
             </h2>
           </div>
@@ -194,6 +181,8 @@
 
 <script>
 import { firestore, storage } from "@/firebase";
+import { GET_CAMPAIGN_DETAILS, GET_IMAGES } from "@/store/actions.type";
+import { mapGetters } from "vuex";
 let urlCrypt = require("url-crypt")(
   "%VKegd<T<\"'7S6,;YB'p[vnt\"x>u`49F(\\d*xdBB6EA"
 );
@@ -203,28 +192,19 @@ export default {
   data() {
     return {
       campaign: urlCrypt.decryptObj(this.$route.params.hash).id,
-      address: "",
-      title: "",
-      description: "",
-      email: "",
-      goal: "",
-      balance: "",
-      days: "",
-      completed: "",
-      percentage: "",
-      images: [],
-      render: 0,
       open: false,
       cpu: 1,
       cpuMin: 1,
       cpuMax: 2,
-      loading: false,
       hashrate: 0,
       balance_pool: 0,
       next_payout: 0,
       connections: 0,
       info: ""
     };
+  },
+  computed: {
+    ...mapGetters(["currentUser", "images", "detail", "loadingImages"])
   },
   methods: {
     calculateDays: function(date, duration) {
@@ -242,9 +222,6 @@ export default {
         return diffDays + " day left";
       }
       return diffDays + " days left";
-    },
-    forceRerender() {
-      this.render += 1;
     }
   },
   created: function() {
@@ -253,41 +230,9 @@ export default {
       this.cpuMax = ncpu;
       this.cpu = ncpu / 2;
     }
-    //Get Firebase information
-    var self = this;
-    let campaignRef = firestore.collection("campaigns").doc(this.campaign);
-
-    campaignRef.get().then(function(doc) {
-      //doc.data() is never undefined for query doc snapshots
-      self.title = doc.data().title;
-      self.description = doc.data().description;
-      self.email = doc.data().email;
-      self.goal = Number(doc.data().goal);
-      self.balance = Number(doc.data().balance);
-      self.days = self.calculateDays(
-        doc.data().creationDate,
-        doc.data().duration
-      );
-      self.completed = Math.round((doc.data().balance / doc.data().goal) * 100);
-      self.address = doc.data().address;
-      self.percentage = "width: " + self.completed + "%";
-
-      for (let i = 0; i < doc.data().images; i++) {
-        storage
-          .ref()
-          .child("/campaigns/" + doc.id + "/img_pos" + i)
-          .getDownloadURL()
-          .then(function(url) {
-            self.images[i] = url;
-            if (i == doc.data().images - 1) {
-              self.forceRerender();
-              self.loading = true;
-            }
-          })
-          .catch(function(error) {
-            console.error(error);
-          });
-      }
+    let current = this;
+    this.$store.dispatch(GET_CAMPAIGN_DETAILS, this.campaign).then(function() {
+      current.$store.dispatch(GET_IMAGES);
     });
   }
 };

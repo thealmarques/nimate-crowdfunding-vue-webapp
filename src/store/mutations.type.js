@@ -16,3 +16,6 @@ export const SET_FILTER = "setFilter";
 export const CLEAR_FILTER = "clearFilter";
 export const SET_SEARCH = "setSearch";
 export const SET_MYCAMPAIGNS = "setMyCampaigns";
+export const SET_IMAGES = "setImages";
+export const SET_DETAIL = "setDetail";
+export const SET_LOADING_IMAGES = "setLoadingImages";

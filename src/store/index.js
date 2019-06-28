@@ -6,6 +6,7 @@ import shared from "./shared.module";
 import profile from "./profile.module";
 import campaigns from "./campaigns.module";
 import mycampaigns from "./mycampaigns.module";
+import campaign from "./campaign.module";
 
 Vue.use(Vuex);
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
     auth: auth,
     profile: profile,
     campaigns: campaigns,
-    mycampaigns: mycampaigns
+    mycampaigns: mycampaigns,
+    campaign: campaign
   }
 });

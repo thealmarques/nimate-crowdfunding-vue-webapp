@@ -15,3 +15,5 @@ export const SEARCH_CAMPAIGN = "searchCampaign";
 export const LOAD_MYCAMPAIGNS = "loadMyCampaigns";
 export const REFRESH_MYCAMPAIGNS = "refreshMyCampaigns";
 export const DELETE_MYCAMPAIGN = "deleteMyCampaign";
+export const GET_CAMPAIGN_DETAILS = "getCampaignDetails";
+export const GET_IMAGES = "getImages";
