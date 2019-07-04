@@ -19,3 +19,7 @@ export const SET_MYCAMPAIGNS = "setMyCampaigns";
 export const SET_IMAGES = "setImages";
 export const SET_DETAIL = "setDetail";
 export const SET_LOADING_IMAGES = "setLoadingImages";
+export const SET_CAMPAIGN_ID = "setCampaignId";
+export const SET_DONATIONS = "setDonations";
+export const SET_PAGINATION = "setPagination";
+export const SET_DONATION_PAGE = "setDonationPage";

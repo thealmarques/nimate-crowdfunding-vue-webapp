@@ -17,3 +17,7 @@ export const REFRESH_MYCAMPAIGNS = "refreshMyCampaigns";
 export const DELETE_MYCAMPAIGN = "deleteMyCampaign";
 export const GET_CAMPAIGN_DETAILS = "getCampaignDetails";
 export const GET_IMAGES = "getImages";
+export const SAVE_TRANSACTION = "saveTransaction";
+export const GET_DONATIONS = "getDonations";
+export const LOAD_CAMPAIGNS_IMAGES = "loadCampaignImages";
+export const INIT_DONATIONS_PAGE = "initDonationsPage";

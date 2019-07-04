@@ -197,9 +197,12 @@ export default {
                 self.$children[0].$children[3].$children[0].images[i].path;
             }
           }
-          self.$router.push({
-            name: "campaigns"
-          });
+
+          setTimeout(function() {
+            self.$router.push({
+              name: "campaigns"
+            });
+          }, 2000);
         })
         .catch(function(error) {
           console.error("Error adding document: ", error);

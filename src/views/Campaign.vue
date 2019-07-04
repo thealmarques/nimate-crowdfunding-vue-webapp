@@ -43,7 +43,7 @@
                         height: 400px;
                         object-fit: contain;
                         font-family: 'object-fit: contain;';"
-                >
+                />
               </div>
             </div>
             <a
@@ -97,10 +97,12 @@
           <div class="col-md-12">
             <div class="progress">
               <div
-                class="progress-bar progress-bar-striped"
+                class="progress-bar"
                 role="progressbar"
-                :style="detail.percentage"
-              >{{detail.completed}}%</div>
+                :style="getPercentage(detail.balance,detail.goal)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >{{Math.round(detail.balance/detail.goal * 100)}}%</div>
             </div>
           </div>
         </div>
@@ -133,15 +135,15 @@
             <i class="d-block fa mb-2 text-muted fa-3x fa-users"></i>
             <p class="mb-6">
               <i>Mine for this Campaign. You will borrow CPU Power.&nbsp;</i>
-              <br>
+              <br />
               <i>Help others for free.</i>
-              <br>
+              <br />
             </p>
             <div id="toggle" class="btn-group btn-group-toggle" data-toggle="buttons">
               <label id="onBtn" class="btn btn-primary">On</label>
               <label id="offBtn" class="btn btn-primary active">
                 Off
-                <br>
+                <br />
               </label>
               <a class="btn btn-info" href="javascript:void(null);" style>
                 <i class="fa fa-fw fa-1x py-1 fa-info"></i>
@@ -149,8 +151,8 @@
                 <span class="badge badge-pill badge-primary"></span>
               </a>
             </div>
-            <br>
-            <br>
+            <br />
+            <br />
           </div>
           <div class="col-md-4">
             <img
@@ -160,16 +162,16 @@
               class="img-fluid d-block"
               id="imgCampaign"
               style
-            >
+            />
           </div>
           <div class="col-lg-4 col-md-4 p-4 text-center">
             <i class="d-block fa mb-2 text-muted fa-3x fa-user-o"></i>
             <p class="mb-6">
               <i>Fund this project&nbsp;</i>
-              <br>
+              <br />
               <i>via NIMIQ</i>
               <i>.</i>
-              <br>
+              <br />
             </p>
             <div class="btn-group">
               <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Send NIMIQ</button>
@@ -177,11 +179,11 @@
                 <form @submit.prevent="createTransaction" class="p-3">
                   <div class="form-group">
                     <label for="sendNimTransaction">Amount</label>
-                    <input type="text" v-model="nim_amount" class="form-control" placeholder="NIMs">
+                    <input type="text" v-model="nim_amount" class="form-control" placeholder="NIMs" />
                   </div>
                   <button type="submit" class="btn btn-primary">
                     Send
-                    <br>
+                    <br />
                   </button>
                 </form>
               </div>
@@ -196,7 +198,11 @@
 
 <script>
 import { firestore, storage } from "@/firebase";
-import { GET_CAMPAIGN_DETAILS, GET_IMAGES } from "@/store/actions.type";
+import {
+  GET_CAMPAIGN_DETAILS,
+  GET_IMAGES,
+  SAVE_TRANSACTION
+} from "@/store/actions.type";
 import { mapGetters } from "vuex";
 import HubApi from "@nimiq/hub-api";
 
@@ -241,6 +247,15 @@ export default {
       // All client requests are async and return a promise
       const signedTransaction = await hubApi.checkout(requestOptions);
       this.info = "Thank you for your contribution";
+      let payment_details = {
+        user: this.currentUser.uid,
+        amount: this.nim_amount,
+        recipient: this.detail.address,
+        campaign: this.campaign,
+        title: this.detail.title,
+        type: "direct" //direct or mining
+      };
+      this.$store.dispatch(SAVE_TRANSACTION, payment_details);
     },
     calculateDays: function(date, duration) {
       let auxDate = new Date(date);
@@ -257,6 +272,10 @@ export default {
         return diffDays + " day left";
       }
       return diffDays + " days left";
+    },
+    getPercentage: function(balance, goal) {
+      let percentagem = Math.round((balance / goal) * 100);
+      return "width: " + percentagem + "%";
     }
   },
   created: function() {

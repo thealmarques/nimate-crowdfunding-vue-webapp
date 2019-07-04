@@ -9,6 +9,7 @@ import Profile from "@/views/Profile";
 import Campaign from "@/views/Campaign";
 import MyCampaigns from "@/views/MyCampaigns";
 import Store from "@/store/index.js";
+import Donations from "@/views/Donations";
 
 Vue.use(Router);
 
@@ -62,6 +63,14 @@ const VueRouter = new Router({
       path: "/mycampaigns",
       name: "mycampaigns",
       component: MyCampaigns,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: "/donations",
+      name: "donations",
+      component: Donations,
       meta: {
         requiresAuth: true
       }

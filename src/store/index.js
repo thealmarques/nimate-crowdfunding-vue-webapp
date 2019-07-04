@@ -7,6 +7,7 @@ import profile from "./profile.module";
 import campaigns from "./campaigns.module";
 import mycampaigns from "./mycampaigns.module";
 import campaign from "./campaign.module";
+import donations from "./donations.module";
 
 Vue.use(Vuex);
 
@@ -19,6 +20,7 @@ export default new Vuex.Store({
     profile: profile,
     campaigns: campaigns,
     mycampaigns: mycampaigns,
-    campaign: campaign
+    campaign: campaign,
+    donations: donations
   }
 });

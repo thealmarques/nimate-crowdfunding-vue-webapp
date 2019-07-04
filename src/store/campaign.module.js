@@ -1,5 +1,14 @@
-import { SET_IMAGES, SET_LOADING_IMAGES, SET_DETAIL } from "./mutations.type";
-import { GET_CAMPAIGN_DETAILS, GET_IMAGES } from "./actions.type";
+import {
+  SET_IMAGES,
+  SET_LOADING_IMAGES,
+  SET_DETAIL,
+  SET_CAMPAIGN_ID
+} from "./mutations.type";
+import {
+  GET_CAMPAIGN_DETAILS,
+  GET_IMAGES,
+  SAVE_TRANSACTION
+} from "./actions.type";
 import { firestore, storage } from "../firebase";
 
 const state = {
@@ -35,12 +44,19 @@ const getters = {
 };
 
 const actions = {
-  async [GET_CAMPAIGN_DETAILS]({ commit }, campaign) {
+  async [GET_CAMPAIGN_DETAILS]({ commit, state }, campaign) {
     //Get Firebase information
     var self = this;
     let campaignRef = firestore.collection("campaigns").doc(campaign);
-    commit(SET_IMAGES, []);
-    commit(SET_LOADING_IMAGES, true);
+
+    if (state.campaign != campaign) {
+      commit(SET_IMAGES, []);
+      commit(SET_LOADING_IMAGES, true);
+    } else {
+      commit(SET_LOADING_IMAGES, false);
+    }
+
+    commit(SET_CAMPAIGN_ID, campaign);
 
     await campaignRef.get().then(function(doc) {
       //doc.data() is never undefined for query doc snapshots
@@ -76,6 +92,43 @@ const actions = {
     }
     commit(SET_IMAGES, images);
     commit(SET_LOADING_IMAGES, false);
+  },
+  async [SAVE_TRANSACTION]({ dispatch }, data) {
+    await firestore
+      .collection("payments")
+      .add({
+        type: data.type,
+        user: data.user,
+        amount: data.amount,
+        recipient: data.recipient,
+        campaign: data.campaign,
+        title: data.title,
+        date: new Date().getTime()
+      })
+      .then(async function() {
+        //update campaign value
+
+        try {
+          let ref = await firestore
+            .collection("campaigns")
+            .doc(data.campaign)
+            .get();
+          var newBalance = parseInt(ref.data().balance) + parseInt(data.amount);
+
+          ref = await firestore
+            .collection("campaigns")
+            .doc(data.campaign)
+            .update({
+              balance: newBalance
+            });
+          dispatch(GET_CAMPAIGN_DETAILS, data.campaign);
+        } catch (error) {
+          console.log("Error while updating campaign, " + error);
+        }
+      })
+      .catch(function(error) {
+        console.error("Error registering payment: ", error);
+      });
   }
 };
 const mutations = {
@@ -87,6 +140,9 @@ const mutations = {
   },
   [SET_LOADING_IMAGES](state, data) {
     state.loading = data;
+  },
+  [SET_CAMPAIGN_ID](state, data) {
+    state.campaign = data;
   }
 };
 

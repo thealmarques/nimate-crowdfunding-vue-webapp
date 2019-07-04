@@ -84,7 +84,7 @@
                 v-model="searchText"
                 placeholder="Search for..."
                 class="search__field"
-              >
+              />
               <button type="submit" class="fa fa-search search__icon"></button>
             </div>
           </form>
@@ -100,7 +100,7 @@
             @click="navigateToCampaign(campaign.id)"
           >
             <article class="blog-card" style="height:280px;">
-              <img class="post-image" :id="campaign.id" v-on:load="showImage(campaign.id)">
+              <img class="post-image" :id="campaign.id" v-on:load="showImage(campaign.id)" />
               <div class="article-details">
                 <h4 class="post-category">{{campaign.data().category}}</h4>
                 <h3 class="post-title">{{campaign.data().title}}</h3>
@@ -132,7 +132,7 @@
           type="button"
           class="btn btn-primary"
           @click="loadMoreCampaigns()"
-        >More Campaigns...</button>
+        >More Campaigns</button>
         <h6 id="loadMoreText" v-else-if="!isLoading && completed">No more campaigns to show 😢</h6>
       </div>
     </div>
@@ -156,7 +156,8 @@ import {
   LOAD_MORE,
   RESET_LOAD,
   FILTER_CATEGORY,
-  SEARCH_CAMPAIGN
+  SEARCH_CAMPAIGN,
+  LOAD_CAMPAIGNS_IMAGES
 } from "@/store/actions.type";
 //import NProgress from "nprogress";
 import objectFitImages from "object-fit-images";
@@ -230,7 +231,9 @@ export default {
     objectFitImages();
     var self = this;
     this.$store.dispatch(RESET_LOAD);
-    this.$store.dispatch(LOAD_CAMPAIGNS);
+    this.$store.dispatch(LOAD_CAMPAIGNS).then(function() {
+      self.$store.dispatch(LOAD_CAMPAIGNS_IMAGES);
+    });
   },
   created: function() {
     //NProgress.start();
