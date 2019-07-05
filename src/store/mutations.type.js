@@ -23,3 +23,5 @@ export const SET_CAMPAIGN_ID = "setCampaignId";
 export const SET_DONATIONS = "setDonations";
 export const SET_PAGINATION = "setPagination";
 export const SET_DONATION_PAGE = "setDonationPage";
+export const SET_NIMIQ_STATE = "setNIMIQState";
+export const SET_ADDRESS_STATS = "setAddressStats";

@@ -21,3 +21,7 @@ export const SAVE_TRANSACTION = "saveTransaction";
 export const GET_DONATIONS = "getDonations";
 export const LOAD_CAMPAIGNS_IMAGES = "loadCampaignImages";
 export const INIT_DONATIONS_PAGE = "initDonationsPage";
+export const START_MINING = "startMining";
+export const STOP_MINING = "stopMining";
+export const CHANGE_THREADS = "changeThreads";
+export const GET_STATS = "getStats";

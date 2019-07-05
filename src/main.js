@@ -11,9 +11,12 @@ import VueModalTor from "vue-modaltor";
 import VuejsDialog from "vuejs-dialog";
 import "vuejs-dialog/dist/vuejs-dialog.min.css";
 import Vuelidate from "vuelidate";
+import "bootstrap-slider/dist/css/bootstrap-slider.css";
+import bFormSlider from "vue-bootstrap-slider";
 
 Vue.config.productionTip = false;
 
+Vue.use(bFormSlider);
 Vue.use(VeeValidate); //to be deprecated
 Vue.use(VueModalTor);
 Vue.use(VuejsDialog);

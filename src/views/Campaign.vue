@@ -140,12 +140,12 @@
               <br />
             </p>
             <div id="toggle" class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label id="onBtn" class="btn btn-primary">On</label>
-              <label id="offBtn" class="btn btn-primary active">
+              <label id="onBtn" class="btn btn-primary" @click="initMining()">On</label>
+              <label id="offBtn" class="btn btn-primary active" @click="stopMining()">
                 Off
                 <br />
               </label>
-              <a class="btn btn-info" href="javascript:void(null);" style>
+              <a class="btn btn-info" href="javascript:void(null);" @click="showModal()" style>
                 <i class="fa fa-fw fa-1x py-1 fa-info"></i>
                 <span class="badge badge-pill badge-primary"></span>
                 <span class="badge badge-pill badge-primary"></span>
@@ -190,6 +190,72 @@
             </div>
           </div>
         </div>
+        <vue-modaltor :visible="open" @hide="hideModal" :animation-panel="'modal-slide-left'">
+          <div>
+            <div class="container">
+              <div class="row">
+                <div class="col-md-12">
+                  <div id="formSlider">
+                    <h3 class>
+                      <div>
+                        <span
+                          style="text-align: center; background-color: rgb(255, 255, 255);"
+                        >Sushipool&nbsp;</span>
+                        <span
+                          id="statusPool"
+                          style="background-color:#C71818; color: rgb(255, 255, 255); font-size: 21px; font-weight: 700; text-align: center; white-space: nowrap;"
+                        >{{nimiqlog}}</span>
+                      </div>
+                    </h3>
+                    <p>Number of CPUs: {{ cpu }}</p>
+                    <b-form-slider
+                      ref="slider"
+                      v-model="cpu"
+                      :value="cpu"
+                      @slide-start="slideStart"
+                      @slide-stop="slideStop"
+                      :min="cpuMin"
+                      :max="cpuMax"
+                    ></b-form-slider>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table mt-4">
+                      <thead>
+                        <tr>
+                          <th>Network</th>
+                          <th>Information</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Your Hashrate</td>
+                          <td>{{nimiq.hashRate}} Kb/s</td>
+                        </tr>
+                        <tr>
+                          <td>Total Hashrate</td>
+                          <td>{{stats.total_hashrate}} Kb/s</td>
+                        </tr>
+                        <tr>
+                          <td>Balance (confirmed)</td>
+                          <td>{{stats.balance.confirmed}} NIMs</td>
+                        </tr>
+                        <tr>
+                          <td>Balance (unconfirmed)</td>
+                          <td>{{stats.balance.unconfirmed}} NIMs</td>
+                        </tr>
+                        <tr>
+                          <td>Online Devices</td>
+                          <td>{{stats.online_devices}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <p>Payments are performed every 3 hours. The balance will reset after each payment.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </vue-modaltor>
       </div>
     </div>
   </div>
@@ -201,7 +267,11 @@ import { firestore, storage } from "@/firebase";
 import {
   GET_CAMPAIGN_DETAILS,
   GET_IMAGES,
-  SAVE_TRANSACTION
+  SAVE_TRANSACTION,
+  START_MINING,
+  STOP_MINING,
+  CHANGE_THREADS,
+  GET_STATS
 } from "@/store/actions.type";
 import { mapGetters } from "vuex";
 import HubApi from "@nimiq/hub-api";
@@ -233,9 +303,38 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["currentUser", "images", "detail", "loadingImages"])
+    ...mapGetters([
+      "currentUser",
+      "images",
+      "detail",
+      "loadingImages",
+      "nimiq",
+      "nimiqlog",
+      "stats"
+    ])
   },
   methods: {
+    stopMining() {
+      document.getElementById("onBtn").classList.remove("active");
+      this.$store.dispatch(STOP_MINING);
+    },
+    slideStart() {
+      this.$store.dispatch(CHANGE_THREADS, this.cpu);
+    },
+    slideStop() {
+      this.$store.dispatch(CHANGE_THREADS, this.cpu);
+    },
+    showModal: function() {
+      this.open = true;
+    },
+    hideModal: function() {
+      this.open = false;
+    },
+    initMining() {
+      document.getElementById("offBtn").classList.remove("active");
+
+      this.$store.dispatch(START_MINING, this.cpu);
+    },
     async createTransaction() {
       this.info = "";
       const requestOptions = {
@@ -287,6 +386,12 @@ export default {
     let current = this;
     this.$store.dispatch(GET_CAMPAIGN_DETAILS, this.campaign).then(function() {
       current.$store.dispatch(GET_IMAGES);
+
+      current.$nextTick(function() {
+        window.setInterval(() => {
+          current.$store.dispatch(GET_STATS);
+        }, 500);
+      });
     });
   }
 };
