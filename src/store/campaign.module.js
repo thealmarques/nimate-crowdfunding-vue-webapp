@@ -195,6 +195,11 @@ const actions = {
           console.log("Miner stoped...");
           commit(SET_NIMIQ_STATE, "Stopped Mining");
         });
+
+        $.miner.on("balance", () => {
+          //mining logic here
+          console.log("New balance available");
+        });
       },
       code => {
         switch (code) {

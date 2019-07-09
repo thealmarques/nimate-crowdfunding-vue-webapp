@@ -12,6 +12,7 @@
           primaryText="Default"
           markIsPrimaryText="Set default"
           popupText="This will be the featured image in the campaign"
+          dropText="Drop images here"
           @upload-success="uploadImageSuccess"
           @before-remove="beforeRemove"
           @edit-image="editImage"

@@ -62,7 +62,9 @@ export default {
       return moment(ts).format("DD/MM/YYYY hh:mm");
     },
     goToPage(index) {
-      this.$store.dispatch(GET_DONATIONS, { type: "direct", page: index });
+      if (this.currentPage != index) {
+        this.$store.dispatch(GET_DONATIONS, { type: "direct", page: index });
+      }
     }
   },
   created: function() {

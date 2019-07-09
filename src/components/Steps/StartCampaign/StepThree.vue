@@ -4,7 +4,7 @@
       <div class="mt-2 field">
         <label>
           NIMIQ Address
-          <br>
+          <br />
         </label>
         <input
           placeholder="NQXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX"
@@ -12,13 +12,13 @@
           :class="['input', $v.form.address.$error ? 'is-danger' : '']"
           type="text"
           v-model="form.address"
-        >
+        />
       </div>
-      <p v-if="$v.form.address.$error" class="help is-danger">Enter your wallet address</p>
+      <p v-if="error.address" class="help is-danger">Invalid address</p>
       <div class="mt-2 field">
         <label>
           Goal
-          <br>
+          <br />
         </label>
         <input
           placeholder="10000 (NIM)"
@@ -26,13 +26,13 @@
           :class="['input', $v.form.goal.$error ? 'is-danger' : '']"
           type="text"
           v-model="form.goal"
-        >
+        />
       </div>
       <p v-if="$v.form.goal.$error" class="help is-danger">Enter your goal (in NIMs)</p>
       <div class="mt-2 field">
         <label>
           Duration
-          <br>
+          <br />
         </label>
         <input
           placeholder="Maximum of 240 days"
@@ -40,7 +40,7 @@
           :class="['input', $v.form.days.$error ? 'is-danger' : '']"
           type="text"
           v-model="form.days"
-        >
+        />
       </div>
       <p v-if="$v.form.days.$error" class="help is-danger">Enter the campaign duration</p>
     </div>
@@ -61,6 +61,9 @@ export default {
         address: "",
         goal: "",
         days: ""
+      },
+      error: {
+        address: ""
       }
     };
   },
@@ -80,6 +83,14 @@ export default {
   methods: {},
   watch: {
     currentStep: function() {
+      try {
+        let addr = Nimiq.Address.fromUserFriendlyAddress(this.form.address);
+      } catch (error) {
+        this.error.address = "Invalid address";
+        this.$emit("can-continue", { value: false });
+        return;
+      }
+      this.error.address = "";
       if (!this.$v.$invalid) {
         this.$emit("can-continue", { value: true });
       } else {
@@ -88,6 +99,15 @@ export default {
     },
     $v: {
       handler: function(val) {
+        try {
+          let addr = Nimiq.Address.fromUserFriendlyAddress(this.form.address);
+        } catch (error) {
+          this.error.address = "Invalid address";
+          this.$emit("can-continue", { value: false });
+          return;
+        }
+        this.error.address = "";
+
         if (!val.$invalid) {
           this.$emit("can-continue", { value: true });
         } else {
@@ -100,20 +120,11 @@ export default {
       if (val === true) {
         this.$v.form.$touch();
       }
-    },
-    validateAddress(address) {
-      let addr;
-      // try {
-      //  addr = Nimiq.Address.fromUserFriendlyAddress(address);
-      // } catch (error) {
-      // console.log(error);
-      // return false;
-      // }
-      return true;
     }
   },
   mounted() {
-    //Nimiq.init();
+    Nimiq.init();
+    this.error.address = "";
     if (!this.$v.$invalid) {
       this.$emit("can-continue", { value: true });
     } else {
