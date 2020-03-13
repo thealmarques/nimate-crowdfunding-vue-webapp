@@ -1,4 +1,4 @@
-# nimiq-funding-new
+# NIMATE
 
 ## Project setup
 ```
