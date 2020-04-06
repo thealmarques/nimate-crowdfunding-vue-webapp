@@ -1,4 +1,4 @@
-# NIMATE - First crypto crowdfunding website for free
+# NIMATE - First free crypto crowdfunding website
 
 ## Disclaimer
 This was developed as a POC, and for that reason this project right now represents a template for future projects.
