@@ -2,7 +2,7 @@
 
 ## Demo
 
-<img src="resources/nimate-demo.gif" height="40%" width="30%"/>
+<img src="resources/nimate-demo.gif" height="80%" width="90%"/>
 
 Note: Probably there are more features developed than the ones appeared on the demo.
 
